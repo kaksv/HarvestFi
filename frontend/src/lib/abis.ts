@@ -25,6 +25,19 @@ export const HARVEST_POOL_ABI = [
   },
   // write
   {
+    name: "createContractByWeight",
+    type: "function",
+    stateMutability: "nonpayable",
+    inputs: [
+      { name: "name_",        type: "string"  },
+      { name: "symbol_",      type: "string"  },
+      { name: "weightGrams",  type: "uint256" },
+      { name: "deadline",     type: "uint256" },
+      { name: "metadataCID",  type: "string"  },
+    ],
+    outputs: [{ name: "id", type: "uint256" }],
+  },
+  {
     name: "invest",
     type: "function",
     stateMutability: "nonpayable",
