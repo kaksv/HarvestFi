@@ -1,9 +1,11 @@
 import { usePrivy } from "@privy-io/react-auth";
 
-export function Header() {
+type Props = { onRegister?: () => void };
+
+export function Header({ onRegister }: Props) {
   const { ready, authenticated, login, logout, user } = usePrivy();
 
-  const addr = user?.wallet?.address;
+  const addr  = user?.wallet?.address;
   const short = addr ? `${addr.slice(0, 6)}…${addr.slice(-4)}` : null;
 
   return (
@@ -12,13 +14,22 @@ export function Header() {
         <span className="text-2xl">🌱</span>
         <div>
           <h1 className="text-xl font-bold tracking-tight">HarvestFi</h1>
-          <p className="text-xs opacity-75">Tokenised Crop Forward Contracts · Base Sepolia</p>
+          <p className="text-xs opacity-75">Tokenised Crop Forwards · Base Sepolia</p>
         </div>
       </div>
 
-      <div>
+      <div className="flex items-center gap-3">
+        {onRegister && (
+          <button
+            onClick={onRegister}
+            className="hidden sm:block text-sm bg-white/10 hover:bg-white/20 border border-white/20 px-4 py-1.5 rounded-full transition"
+          >
+            🧑🌾 Register Harvest
+          </button>
+        )}
+
         {!ready ? null : authenticated ? (
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
             <span className="text-sm font-mono bg-white/10 px-3 py-1 rounded-full">{short}</span>
             <button
               onClick={logout}
