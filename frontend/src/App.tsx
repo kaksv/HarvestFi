@@ -26,7 +26,7 @@ function Hero({ onRegister, totalRaised, activeCount, avgApy }: {
 }) {
   const { authenticated, login } = usePrivy();
   return (
-    <div className="bg-harvest-green rounded-3xl px-8 py-12 mb-10 text-center relative overflow-hidden">
+    <div className="bg-harvest-green rounded-3xl px-5 py-10 mb-10 text-center relative overflow-hidden">
       {/* background texture */}
       <div className="absolute inset-0 opacity-5 pointer-events-none select-none text-[120px] leading-none flex flex-wrap gap-4 overflow-hidden">
         {Array.from({ length: 24 }).map((_, i) => <span key={i}>🌱</span>)}
@@ -146,7 +146,7 @@ export default function App() {
     return (
       <div className="min-h-screen bg-gray-50 font-sans">
         <Header />
-        <main className="max-w-5xl mx-auto px-4 py-6">
+        <main className="max-w-6xl mx-auto px-2 sm:px-3 py-6">
           <button
             onClick={() => setView("home")}
             className="text-sm text-harvest-green flex items-center gap-1 mb-6 hover:underline"
@@ -163,7 +163,7 @@ export default function App() {
     <div className="min-h-screen bg-gray-50 font-sans">
       <Header onRegister={() => setView("register")} />
 
-      <main className="max-w-5xl mx-auto px-4 py-8">
+      <main className="max-w-6xl mx-auto px-2 sm:px-3 py-8">
         <Hero
           onRegister={() => setView("register")}
           totalRaised={totalRaisedFmt}
