@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useRegister, type RegisterParams } from "../hooks/useRegister";
+import { useGeoLocation } from "../hooks/useGeoLocation";
 
 const CROPS = [
   { name: "Coffee",  symbol: "hCOFFEE",  emoji: "☕" },
@@ -76,8 +77,10 @@ export function RegisterPage() {
   const [weightKg, setWeightKg]       = useState("");
   const [deadlineDays, setDeadlineDays] = useState("");
   const [gps, setGps]                 = useState("");
+  const [gpsAddress, setGpsAddress]   = useState("");
   const [txHash, setTxHash]           = useState("");
   const [error, setError]             = useState("");
+  const geo                           = useGeoLocation();
 
   function next() { setStep(STEPS[STEPS.indexOf(step) + 1]); }
 
@@ -188,17 +191,77 @@ export function RegisterPage() {
       {/* ── Step 5: GPS ── */}
       {step === "gps" && (
         <Card>
-          <Label>Farm GPS coordinates</Label>
-          <Input
-            placeholder="e.g. 1.0456, 34.1234"
-            value={gps}
-            onChange={(e) => setGps(e.target.value)}
-            autoFocus
-          />
-          <p className="text-xs text-gray-400 mt-2">
-            Stored as proof-of-farm metadata. Latitude, Longitude format.
-          </p>
-          <NextBtn onClick={next} disabled={!gps.trim()}>Continue →</NextBtn>
+          <Label>📍 Farm Location</Label>
+
+          {/* Auto-detect button */}
+          {geo.state.status !== "ok" && (
+            <button
+              onClick={geo.locate}
+              disabled={geo.state.status === "locating"}
+              className="w-full flex items-center justify-center gap-2 border-2 border-harvest-green text-harvest-green rounded-xl py-3 font-semibold text-sm hover:bg-harvest-cream transition disabled:opacity-50 mb-4"
+            >
+              {geo.state.status === "locating" ? (
+                <><span className="animate-spin">⏳</span> Detecting location…</>
+              ) : (
+                <><span>📡</span> Use My Current Location</>
+              )}
+            </button>
+          )}
+
+          {/* Success state */}
+          {geo.state.status === "ok" && (
+            <div className="bg-harvest-cream rounded-xl p-4 mb-4">
+              <div className="flex justify-between items-start">
+                <div>
+                  <p className="text-xs text-gray-500 mb-0.5">Detected location</p>
+                  <p className="text-sm font-semibold text-harvest-brown leading-snug">{geo.state.result.address}</p>
+                  <p className="text-xs font-mono text-gray-400 mt-1">{geo.state.result.coords}</p>
+                </div>
+                <button onClick={() => { geo.reset(); setGps(""); setGpsAddress(""); }} className="text-xs text-gray-400 hover:text-red-400 ml-3 shrink-0">✕ Clear</button>
+              </div>
+            </div>
+          )}
+
+          {/* Error from geolocation */}
+          {geo.state.status === "error" && (
+            <p className="text-xs text-red-500 mb-3">{geo.state.message}</p>
+          )}
+
+          {/* Manual fallback */}
+          {geo.state.status !== "ok" && (
+            <>
+              <p className="text-xs text-gray-400 mb-2 text-center">— or enter manually —</p>
+              <Input
+                placeholder="e.g. 1.0456, 34.1234"
+                value={gps}
+                onChange={(e) => setGps(e.target.value)}
+              />
+              <p className="text-xs text-gray-400 mt-1">
+                Latitude, Longitude · Don't know your coordinates?{" "}
+                <a
+                  href="https://maps.google.com"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-harvest-green underline"
+                >
+                  Find on Google Maps →
+                </a>
+              </p>
+            </>
+          )}
+
+          <NextBtn
+            onClick={() => {
+              if (geo.state.status === "ok") {
+                setGps(geo.state.result.coords);
+                setGpsAddress(geo.state.result.address);
+              }
+              next();
+            }}
+            disabled={geo.state.status === "locating" || (geo.state.status !== "ok" && !gps.trim())}
+          >
+            Continue →
+          </NextBtn>
         </Card>
       )}
 
@@ -212,7 +275,8 @@ export function RegisterPage() {
               ["🌱 Crop",          `${crop.emoji} ${crop.name} (${crop.symbol})`],
               ["⚖️ Weight",        `${weightKg} kg`],
               ["📅 Delivery in",   `${deadlineDays} days`],
-              ["📍 GPS",           gps],
+              ["📍 Location",       gpsAddress || gps],
+              ["🗺️ Coordinates",    gps],
             ].map(([label, value]) => (
               <div key={label} className="flex justify-between border-b border-gray-100 pb-2">
                 <span className="text-gray-500">{label}</span>
